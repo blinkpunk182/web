@@ -1,6 +1,7 @@
 import axios from "axios";
 import { BASE_API_URL } from "../utils/constants";
 import { obtenerUsuario } from "./auth.service";
+import emailjs from "@emailjs/browser";
 
 export const registrarTutorado = async (tutorado) => {
   try {
@@ -108,6 +109,59 @@ export const getNotificationsByIdTutorado = async (idTutorado) => {
       `${BASE_API_URL}/notificacion/${idTutorado}`
     );
     return response?.data || {};
+  } catch (error) {
+    return error?.response?.data?.error;
+  }
+};
+
+export const getSendEmail = async (idTutorado) => {
+  try {
+    const response = await axios.get(
+      `${BASE_API_URL}/tutorado/send-email/${idTutorado}`
+    );
+    return response?.data;
+  } catch (error) {
+    return error?.response?.data?.error;
+  }
+};
+
+export const sendEmail = (tutorado, sendActive) => {
+  if (sendActive) {
+    const usuario = obtenerUsuario();
+    emailjs
+      .send(
+        "service_g5p1rjs",
+        "template_iq200ok",
+        {
+          from_name: tutorado?.nombreCompleto,
+          to_name: usuario?.nombre,
+          message:
+            "Este correo fue generado automáticamente mediante el sistema mediante una alerta",
+          destinatario: usuario?.correo,
+        },
+        "1jRopWTyJTzuwxXmM"
+      )
+      .then(
+        function (response) {
+          console.log("SUCCESS!!!!!", response.status, response.text);
+          if (response?.status === 200) {
+            updateSendEmail(tutorado?.tutorado);
+          }
+        },
+        function (err) {
+          console.log("FAILED...", err);
+        }
+      );
+  }
+};
+
+const updateSendEmail = async (idTutorado) => {
+  try {
+    const response = await axios.put(
+      `${BASE_API_URL}/tutorado/actualizar-fecha-email/${idTutorado}`,
+      {}
+    );
+    return response || {};
   } catch (error) {
     return error?.response?.data?.error;
   }

@@ -11,7 +11,8 @@ import { BASE_URL } from "utils/constants";
 import { getNotificationsByTutor } from "services/tutorado.service";
 import { useLanguage } from "hooks/useLanguage";
 import { idioma } from "utils/constants";
-
+import { getSendEmail } from "services/tutorado.service";
+import { sendEmail } from "services/tutorado.service";
 const Navbar = (props) => {
   const navigate = useNavigate();
   const socket = io(BASE_URL);
@@ -36,8 +37,12 @@ const Navbar = (props) => {
   }, []);
 
   useEffect(() => {
-    socket.on("notificacion", (data) => {
+    socket.on("notificacion", async (data) => {
       console.log("notificacion", data);
+      const resp = await getSendEmail(data?.tutorado);
+      if (resp) {
+        await sendEmail(data, resp);
+      }
       getNotifications();
       setPoint(true);
     });
