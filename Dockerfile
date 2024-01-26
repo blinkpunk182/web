@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Instalar las dependencias
-RUN npm install
+RUN npm install --force
 
 # Copiar el contenido del directorio actual al directorio de trabajo en el contenedor
 COPY . .
